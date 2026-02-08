@@ -124,7 +124,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Daily close with 30- and 90-day moving averages."
-    desc = "This chart shows Apple's daily closing price over the past year, with 30-day and 90-day moving averages. The moving averages help visualize medium- and long-term price trends, smoothing out short-term fluctuations."
+    desc = "This chart plots Apple's daily closing price for the past year and overlays 30-day and 90-day moving averages. The moving averages smooth short-term noise to reveal the underlying trend direction; when the close stays above both averages the trend is typically stronger, while compression between the lines signals slowing momentum."
     pages.append((fig, 'Moving Averages', caption, desc))
 
     # Trendline with extension
@@ -141,7 +141,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Linear trend fitted to closing prices with a 30-trading-day extension."
-    desc = "A linear trendline is fitted to Apple's historical closing prices and extended 30 trading days into the future. This illustrates the average price drift, but does not account for volatility or unexpected events."
+    desc = "A linear trendline is fitted to Apple's historical closing prices and extended 30 trading days into the future. The slope in the title quantifies the average daily drift, and the dotted vertical line marks the last observed date to separate history from the simple projection. This extension is a baseline reference only and does not capture volatility or event-driven shocks."
     pages.append((fig, 'Trend Extension', caption, desc))
 
     # Daily returns histogram
@@ -162,7 +162,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Distribution of daily log returns with a normal fit overlay."
-    desc = "This histogram shows the distribution of daily log returns for Apple stock. The red dashed line is a normal distribution fit, allowing comparison of actual return behavior to theoretical expectations (skewness, fat tails)."
+    desc = "This histogram shows the distribution of Apple's daily log returns, centered around zero for typical daily moves. The red dashed curve is a normal distribution fit, letting you compare the real return shape to the theoretical bell curve and spot asymmetry or heavier tails that indicate more extreme moves than normal."
     pages.append((fig, 'Returns Histogram', caption, desc))
 
     # 30-day rolling volatility (annualized)
@@ -177,7 +177,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Rolling 30-day (annualized) volatility of daily log returns."
-    desc = "The 30-day rolling volatility (annualized) measures the time-varying risk of Apple stock. Higher volatility periods indicate greater uncertainty and larger price swings, often coinciding with major news or events."
+    desc = "The 30-day rolling volatility (annualized) tracks how Apple's risk changes over time by measuring the variability of recent daily returns. Spikes reflect periods of heightened uncertainty and larger price swings, while flatter stretches indicate calmer trading conditions."
     pages.append((fig, 'Rolling Volatility', caption, desc))
 
     # 30-day projected price range
@@ -197,7 +197,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Projects a 30‑day price band using realized volatility (one standard deviation over 30 days, 1σ30)."
-    desc = "The shaded band projects a 30-day price range using the latest close (last_price) and historical daily log-return volatility from the computed metrics. The daily volatility (σ) is scaled by √30 to form σ30 (the 30-day volatility). The range uses last_price × exp(σ30) for the upper bound and last_price × exp(-σ30) for the lower bound, so it represents a probabilistic 1σ band rather than a point forecast."
+    desc = "The shaded band projects a 30-day price range using the latest close and historical daily log-return volatility. Daily volatility (σ) is scaled by √30 to estimate σ30, and the band uses last_price × exp(±σ30) for the upper and lower bounds. It represents a probabilistic 1σ range if recent volatility persists, not a guaranteed forecast."
     pages.append((fig, '30‑day Projected Range', caption, desc))
 
     # Volume chart
@@ -210,7 +210,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Shares traded per day based on Yahoo Finance volume."
-    desc = "This chart displays Apple's daily trading volume. Spikes in volume often signal major price moves, news releases, or shifts in investor sentiment, and help assess liquidity."
+    desc = "This chart displays Apple's daily trading volume, highlighting how much liquidity traded each session. Noticeable spikes often accompany earnings releases, macro headlines, or large price moves, and elevated volume during trend changes can signal stronger conviction from market participants."
     pages.append((fig, 'Volume', caption, desc))
 
     # Now build final PDF: title page, TOC, then pages with headers/footers
@@ -283,7 +283,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
             fig.text(header_x, 0.98, 'Apple Inc. (AAPL)', ha='left', va='top', fontsize=8)
             fig.text(0.5, caption_y, caption, ha='center', va='top', fontsize=9, fontweight='bold')
             wrapped_desc = textwrap.fill(description, width=description_wrap_width)
-            fig.text(0.5, description_y_position, wrapped_desc, ha='center', va='top', fontsize=9, color='gray', linespacing=description_line_spacing)
+            fig.text(0.5, description_y_position, wrapped_desc, ha='center', va='top', fontsize=10, color='black', linespacing=description_line_spacing)
             fig.text(0.98, 0.02, f'Page {page_no}', ha='right', va='bottom', fontsize=8)
             fig.text(footer_x, 0.02, f'Generated: {gen_date}', ha='left', va='bottom', fontsize=8)
             pdf.savefig(fig)
