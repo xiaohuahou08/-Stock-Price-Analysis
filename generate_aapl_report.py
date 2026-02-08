@@ -79,8 +79,8 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     compact_chart_figsize = (10.0, 4.3)
     header_top_adjust = 0.9
     footer_bottom_adjust = 0.32
-    caption_y = 0.26
-    description_y_position = 0.20
+    caption_y = 0.23
+    description_y_position = 0.17
     description_wrap_width = 105
     description_line_spacing = 1.15
     header_x = 0.02
@@ -284,7 +284,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
             fig.text(header_x, 0.98, 'Apple Inc. (AAPL)', ha='left', va='top', fontsize=8)
             fig.text(0.5, caption_y, caption, ha='center', va='top', fontsize=9, fontweight='bold')
             wrapped_desc = textwrap.fill(description, width=description_wrap_width)
-            fig.text(0.5, description_y_position, wrapped_desc, ha='center', va='top', fontsize=8, color='gray', linespacing=description_line_spacing)
+            fig.text(0.5, description_y_position, wrapped_desc, ha='center', va='top', fontsize=9, color='gray', linespacing=description_line_spacing)
             fig.text(0.98, 0.02, f'Page {page_no}', ha='right', va='bottom', fontsize=8)
             fig.text(footer_x, 0.02, f'Generated: {gen_date}', ha='left', va='bottom', fontsize=8)
             pdf.savefig(fig)
