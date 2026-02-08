@@ -322,6 +322,37 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     wrapped_summary = textwrap.fill(summary_text, width=96)
     plt.text(0.07, 0.85, wrapped_summary, va='top', ha='left', fontsize=11)
 
+    # Section 3: Event Impact & Projection Analysis (written requirements)
+    event_fig = plt.figure(figsize=(8.27, 11.69))
+    event_fig.suptitle('Section 3 — Event Impact & Projection Analysis', fontsize=18, y=0.95)
+    plt.axis('off')
+    event_text = (
+        "Key findings: Over the past year, Apple’s shares have traded around the mid‑range of the dataset, with "
+        "the latest close near the 30‑ and 90‑day averages, a mildly positive trend slope, and a volatility profile "
+        f"that supports a 30‑day 1σ range of roughly {proj_low:.2f}–{proj_high:.2f}. Price range projection rationale: "
+        "the band is derived from realized daily log‑return volatility, scaled by √30 and applied to the latest close, "
+        "so it reflects a probabilistic corridor tied to recent risk conditions rather than a point forecast. Event "
+        "impact analysis: mergers and acquisitions can re‑rate valuation expectations and synergies, while stock "
+        "splits or reverse splits chiefly alter share count, liquidity, and retail accessibility without changing "
+        "enterprise value. Industry-specific events such as regulatory rulings, product launches, product recalls, or "
+        "supply‑chain shifts can trigger gap moves and volume spikes, and economic events—including Federal Reserve "
+        "rate decisions, inflation prints, and GDP surprises—can move discount rates and consumer demand, often "
+        "amplifying sector‑wide swings [2]. Other significant events like geopolitical shocks, litigation outcomes, or "
+        "management changes can inject sudden risk repricing and shift the trading range. Limitations: the analysis "
+        "relies on historical prices from Yahoo Finance [1] and qualitative event framing; it does not model specific "
+        "announcements, intraday reactions, options‑implied expectations, or forward guidance, so outputs should be "
+        "treated as scenario ranges, not certainty."
+    )
+    wrapped_event_text = textwrap.fill(event_text, width=96)
+    event_fig.text(0.07, 0.85, wrapped_event_text, va='top', ha='left', fontsize=11)
+    sources_text = (
+        "Sources:\n"
+        "[1] Yahoo Finance, AAPL Historical Data, https://finance.yahoo.com/quote/AAPL/history\n"
+        "[2] Federal Reserve Board, FOMC calendars & policy decisions, https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    )
+    wrapped_sources = textwrap.fill(sources_text, width=96)
+    event_fig.text(0.07, 0.18, wrapped_sources, va='top', ha='left', fontsize=9)
+
     # Save all to PDF in order: title, stock selection, data collection, analysis intro, then chart pages
     with PdfPages(out_pdf) as pdf:
         page_no = 1
@@ -353,6 +384,13 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
             pdf.savefig(fig)
             plt.close(fig)
             page_no += 1
+
+        event_fig.text(header_x, 0.98, 'Apple Inc. (AAPL)', ha='left', va='top', fontsize=8)
+        event_fig.text(0.98, 0.02, f'Page {page_no}', ha='right', va='bottom', fontsize=8)
+        event_fig.text(footer_x, 0.02, f'Generated: {gen_date}', ha='left', va='bottom', fontsize=8)
+        pdf.savefig(event_fig)
+        plt.close(event_fig)
+        page_no += 1
 
     print(f'Report saved to {out_pdf}')
 
