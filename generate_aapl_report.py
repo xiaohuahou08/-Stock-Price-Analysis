@@ -93,6 +93,13 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     slope = metrics['slope']
     intercept = metrics['intercept']
     last_date = dates.iloc[-1]
+    last_price = metrics['last_price']
+    mean_price = metrics['mean']
+    median_price = metrics['median']
+    std_price = metrics['std']
+    ma30_last = ma30.iloc[-1]
+    ma90_last = ma90.iloc[-1]
+    trend_30_ext = last_price + slope * 30
 
     # future business days for 30 trading days
     future_dates = pd.bdate_range(last_date + timedelta(days=1), periods=30)
@@ -121,10 +128,32 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     ax.set_ylabel('Price (USD)')
     ax.legend()
     ax.grid(alpha=0.2)
+    stats_text = (
+        f"Last close: {last_price:.2f}\n"
+        f"Mean/Median: {mean_price:.2f}/{median_price:.2f}\n"
+        f"Std dev: {std_price:.2f}\n"
+        f"30d MA: {ma30_last:.2f}\n"
+        f"90d MA: {ma90_last:.2f}"
+    )
+    ax.text(
+        0.02,
+        0.98,
+        stats_text,
+        transform=ax.transAxes,
+        ha='left',
+        va='top',
+        fontsize=8,
+        bbox=dict(boxstyle='round', facecolor='white', edgecolor='gray', alpha=0.85),
+    )
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Daily close with 30- and 90-day moving averages."
-    desc = "This chart plots Apple's daily closing price for the past year and overlays 30-day and 90-day moving averages. The moving averages smooth short-term noise to reveal the underlying trend direction. When the close stays above both averages, the trend is typically stronger, while compression between the lines signals slowing momentum."
+    desc = (
+        "This chart plots Apple's daily closing price for the past year and overlays 30-day and 90-day moving averages. "
+        f"The latest close is {last_price:.2f}, with a mean of {mean_price:.2f}, a median of {median_price:.2f}, and a "
+        f"standard deviation of {std_price:.2f} across the period. The most recent moving averages are {ma30_last:.2f} "
+        f"(30d) and {ma90_last:.2f} (90d), smoothing short-term noise to reveal the underlying trend direction."
+    )
     pages.append((fig, 'Moving Averages', caption, desc))
 
     # Trendline with extension
@@ -138,10 +167,26 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     ax.set_ylabel('Price (USD)')
     ax.legend()
     ax.grid(alpha=0.2)
+    trend_text = f"Slope: {slope:.4f} USD/day\n30d extension: {trend_30_ext:.2f}"
+    ax.text(
+        0.02,
+        0.98,
+        trend_text,
+        transform=ax.transAxes,
+        ha='left',
+        va='top',
+        fontsize=8,
+        bbox=dict(boxstyle='round', facecolor='white', edgecolor='gray', alpha=0.85),
+    )
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Linear trend fitted to closing prices with a 30-trading-day extension."
-    desc = "A linear trendline is fitted to Apple's historical closing prices and extended 30 trading days into the future. The slope in the title quantifies the average daily drift, and the dotted vertical line marks the last observed date to separate history from the simple projection. This extension is a baseline reference only and does not capture volatility or event-driven shocks."
+    desc = (
+        "A linear trendline is fitted to Apple's historical closing prices and extended 30 trading days into the future. "
+        f"The slope is {slope:.4f} USD/day, implying a 30-day extension near {trend_30_ext:.2f} if the linear drift persists. "
+        "The dotted vertical line marks the last observed date to separate history from the simple projection. This extension "
+        "is a baseline reference only and does not capture volatility or event-driven shocks."
+    )
     pages.append((fig, 'Trend Extension', caption, desc))
 
     # Daily returns histogram
@@ -194,10 +239,26 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     ax.set_ylabel('Price (USD)')
     ax.grid(alpha=0.2)
     ax.legend()
+    range_text = f"30d 1σ range:\n{proj_low:.2f} to {proj_high:.2f}"
+    ax.text(
+        0.02,
+        0.98,
+        range_text,
+        transform=ax.transAxes,
+        ha='left',
+        va='top',
+        fontsize=8,
+        bbox=dict(boxstyle='round', facecolor='white', edgecolor='gray', alpha=0.85),
+    )
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Projects a 30‑day price band using realized volatility (one standard deviation over 30 days, 1σ30)."
-    desc = "The shaded band projects a 30-day price range using the latest close and historical daily log-return volatility. Daily volatility (σ) is scaled by √30 to estimate σ30, and the band uses last_price × exp(±σ30) for the upper and lower bounds. It represents a probabilistic 1σ range if recent volatility persists, not a guaranteed forecast."
+    desc = (
+        f"The shaded band projects a 30-day price range of {proj_low:.2f} to {proj_high:.2f} using the latest close "
+        f"({last_price:.2f}) and historical daily log-return volatility. Daily volatility (σ) is scaled by √30 to estimate "
+        "σ30, and the band uses last_price × exp(±σ30) for the upper and lower bounds. It represents a probabilistic 1σ "
+        "range if recent volatility persists, not a guaranteed forecast."
+    )
     pages.append((fig, '30‑day Projected Range', caption, desc))
 
     # Volume chart
@@ -210,7 +271,11 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Shares traded per day based on Yahoo Finance volume."
-    desc = "This chart displays Apple's daily trading volume, highlighting how much liquidity traded each session. Noticeable spikes often accompany earnings releases, macro headlines, or large price moves, and elevated volume during trend changes can signal stronger conviction from market participants."
+    desc = (
+        "This chart displays Apple's daily trading volume, highlighting how much liquidity traded each session. "
+        "Noticeable spikes often accompany earnings releases, macro headlines, or large price moves, and elevated "
+        "volume during trend changes can signal stronger conviction from market participants."
+    )
     pages.append((fig, 'Volume', caption, desc))
 
     # Now build final PDF: title page, TOC, then pages with headers/footers
@@ -243,20 +308,19 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
 
     # Data Analysis section intro page (summary text recreated here)
     summary_text = (
-        f"Last close: {metrics['last_price']:.2f}\n"
-        f"Mean: {metrics['mean']:.2f}   Median: {metrics['median']:.2f}   Std: {metrics['std']:.2f}\n"
-        f"30d MA (latest): {metrics['ma30'].iloc[-1]:.2f}   90d MA (latest): {metrics['ma90'].iloc[-1]:.2f}\n"
-        f"Trend slope: {metrics['slope']:.4f} USD/day   30‑day trend ext: {metrics['last_price'] + metrics['slope']*30:.2f}\n"
-        f"30‑day projected 1σ range: {proj_low:.2f} — {proj_high:.2f}\n"
-        "Projection method: daily log-return volatility scaled by √30 to σ30 (30-day volatility), with the range computed as last_price × exp(±σ30).\n\n"
-        "Event drivers (summary): dividends and earnings, product cycles, macro (rates/inflation),\n"
-        "industry supply/competitive events. Limitations: uses historical realized volatility, linear trend,\n"
-        "and does not capture intraday or options-implied signals or future structural breaks.\n"
+        "Section 2 focuses on Apple's price behavior over the past year using the charts that follow. Key metrics "
+        "such as the latest close, central tendency, moving-average levels, trend slope, and volatility-based "
+        "projection range are plotted directly on the figures so each statistic is tied to its visual context. "
+        "Event drivers across the period include dividends and earnings updates, product-cycle news, macro "
+        "developments like rates and inflation, and industry supply or competitive shifts. Limitations: the analysis "
+        "uses historical realized volatility and a linear trend baseline, and it does not capture intraday or "
+        "options-implied signals or future structural breaks."
     )
     analysis_fig = plt.figure(figsize=(8.27, 11.69))
     analysis_fig.suptitle('Section 2 — Data Analysis', fontsize=18, y=0.95)
     plt.axis('off')
-    plt.text(0.07, 0.85, summary_text, va='top', ha='left', fontsize=11)
+    wrapped_summary = textwrap.fill(summary_text, width=96)
+    plt.text(0.07, 0.85, wrapped_summary, va='top', ha='left', fontsize=11)
 
     # Save all to PDF in order: title, stock selection, data collection, analysis intro, then chart pages
     with PdfPages(out_pdf) as pdf:
