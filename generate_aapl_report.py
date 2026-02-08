@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import textwrap
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from scipy.stats import norm
 
 
 def parse_raw(path='yahoo_history_raw.txt'):
@@ -133,7 +134,6 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     sigma = returns.std()
     fig, ax = plt.subplots(figsize=(8, 6))
     n, bins, patches = ax.hist(returns, bins=30, density=True, alpha=0.6, color='tab:blue')
-    from scipy.stats import norm
     x_vals = np.linspace(returns.min(), returns.max(), 200)
     ax.plot(x_vals, norm.pdf(x_vals, mu, sigma), 'r--', label='Normal PDF')
     ax.set_title('Daily Log Returns Histogram')
@@ -175,43 +175,19 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     plt.text(0.5, 0.55, '1‑Year Price Analysis', ha='center', va='center', fontsize=18)
     plt.text(0.5, 0.45, f'Generated: {datetime.utcnow().date()}', ha='center', va='center', fontsize=10)
 
-    # Build sections: merge Stock Selection + Data Collection, add Events, then Data Analysis
-    rows_count = len(df)
-    date_range = f"{df['Date'].min()} to {df['Date'].max()}"
-
-    # Combined Selection & Data Collection page
+    # Build sections: combine Selection/Data Collection with Events, then Data Analysis
+    # Combined Selection, Data Collection, and Events page
     combined_fig = plt.figure(figsize=(8.27, 11.69))
-    combined_fig.suptitle('Section 1 — Selection & Data Collection', fontsize=18, y=0.95)
+    combined_fig.suptitle('Section 1 — Selection, Data Collection & Major Events', fontsize=18, y=0.95)
     plt.axis('off')
     combined_paragraphs = [
-        "Selection: Apple Inc. (AAPL) — large-cap U.S. equity chosen for its liquidity and representative exposure to consumer technology.",
-        "Rationale: chosen for liquidity, availability of a full year of daily data, and relevance to sector-level analysis (devices, services, and semiconductors).",
-        "Data collection: Yahoo Finance historical prices table was downloaded on the report run date and saved verbatim to `yahoo_history_raw.txt` to preserve the exact rows used.",
-        f"Parsing pipeline: `parse_raw()` regex-extracts the table into numeric Open/High/Low/Close/Adj Close/Volume fields, sorts ascending by date, drops non-price marker rows (e.g., dividends/splits), and coerces volumes to integers. Rows parsed: {rows_count}. Date range: {date_range}.",
-        "Reproducibility: rerun `analysis_aapl.py` or `generate_aapl_report.py` to regenerate the raw text and metrics using the same steps; volumes remain unadjusted share counts while prices use Yahoo's adjusted-close column for comparability.",
+        "Apple Inc. (AAPL) was selected because it is a highly traded, large-cap company that represents the consumer technology sector. A full year of daily prices provides a consistent view of recent market behavior. Major price drivers include quarterly earnings updates, product launches such as WWDC and the fall iPhone release, shifts in supply-chain or competitive conditions, and broader factors like interest-rate decisions, inflation data, currency moves, and regulatory headlines that can change sentiment and trading volume.",
     ]
     y0 = 0.88
     for p in combined_paragraphs:
         wrapped = textwrap.fill(p, width=96)
         combined_fig.text(0.07, y0, wrapped, va='top', ha='left', fontsize=11)
         y0 -= 0.07
-
-    # Events and drivers page
-    events_fig = plt.figure(figsize=(8.27, 11.69))
-    events_fig.suptitle('Section 2 — Major Events & Drivers', fontsize=18, y=0.95)
-    plt.axis('off')
-    events_paragraphs = [
-        "Corporate: Quarterly earnings (typically late Jan/Apr/Jul/Oct) and forward guidance, buyback/dividend updates, and major launch events (WWDC in June, iPhone/Watch refresh in September) often trigger sharp repricing of growth and margin expectations.",
-        "Industry: Semiconductor supply, foundry pricing (e.g., TSMC), and competitor launches in smartphones, PCs, and wearables shift share assumptions; channel checks or disruptions in Greater China/Europe can swing demand outlooks.",
-        "Economic: FOMC rate decisions, CPI/PCE inflation releases, and labor data reset discount rates and consumer spending expectations; USD strength/weakness and tariff or export-control actions move reported revenue and cost structures.",
-        "Sentiment & Events: Regulatory actions (App Store, antitrust), high-profile litigation, cybersecurity incidents, or macro shocks (banking stress, pandemics, geopolitical conflict) can cause volatility spikes or regime shifts.",
-        "How they impact price: Positive surprises to revenue growth, services margins, or cost control widen valuation multiples; negative guidance, supply constraints, or macro tightening compress multiples and drive gap-downs, usually alongside elevated volume.",
-    ]
-    y1 = 0.88
-    for p in events_paragraphs:
-        wrapped = textwrap.fill(p, width=96)
-        events_fig.text(0.07, y1, wrapped, va='top', ha='left', fontsize=11)
-        y1 -= 0.08
 
     # Data Analysis section intro page (summary text recreated here)
     summary_text = (
@@ -225,7 +201,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
         "and does not capture intraday or options-implied signals or future structural breaks.\n"
     )
     analysis_fig = plt.figure(figsize=(8.27, 11.69))
-    analysis_fig.suptitle('Section 3 — Data Analysis', fontsize=18, y=0.95)
+    analysis_fig.suptitle('Section 2 — Data Analysis', fontsize=18, y=0.95)
     plt.axis('off')
     plt.text(0.07, 0.85, summary_text, va='top', ha='left', fontsize=11)
 
@@ -242,12 +218,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
         plt.close(combined_fig)
         page_no += 1
 
-        # Section 2: Major Events & Drivers
-        pdf.savefig(events_fig)
-        plt.close(events_fig)
-        page_no += 1
-
-        # Section 3: Data Analysis (intro)
+        # Section 2: Data Analysis (intro)
         pdf.savefig(analysis_fig)
         plt.close(analysis_fig)
         page_no += 1
