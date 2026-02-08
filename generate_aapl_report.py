@@ -81,6 +81,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     caption_y = 0.23
     description_y_position = 0.17
     description_wrap_width = 105
+    analysis_wrap_width = 90
     description_line_spacing = 1.15
     header_x = 0.02
     footer_x = 0.02
@@ -318,7 +319,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     analysis_fig = plt.figure(figsize=(8.27, 11.69))
     analysis_fig.suptitle('Section 2 — Data Analysis', fontsize=18, y=0.95)
     plt.axis('off')
-    wrapped_summary = textwrap.fill(summary_text, width=96)
+    wrapped_summary = textwrap.fill(summary_text, width=analysis_wrap_width)
     plt.text(0.07, 0.85, wrapped_summary, va='top', ha='left', fontsize=11)
 
     # Section 3: Event Impact & Projection Analysis (written requirements)
