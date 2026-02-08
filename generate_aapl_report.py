@@ -186,7 +186,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     combined_paragraphs = [
         "Selection: Apple Inc. (AAPL) — large-cap U.S. equity chosen for its liquidity and representative exposure to consumer technology.",
         "Rationale: chosen for liquidity, availability of a full year of daily data, and relevance to sector-level analysis (devices, services, and semiconductors).",
-        "Data collection: Yahoo Finance historical-prices table was downloaded on the report run date and saved verbatim to `yahoo_history_raw.txt` to preserve the exact rows used.",
+        "Data collection: Yahoo Finance historical prices table was downloaded on the report run date and saved verbatim to `yahoo_history_raw.txt` to preserve the exact rows used.",
         f"Parsing pipeline: `parse_raw()` regex-extracts the table into numeric Open/High/Low/Close/Adj Close/Volume fields, sorts ascending by date, drops non-price marker rows (e.g., dividends/splits), and coerces volumes to integers. Rows parsed: {rows_count}. Date range: {date_range}.",
         "Reproducibility: rerun `analysis_aapl.py` or `generate_aapl_report.py` to regenerate the raw text and metrics using the same steps; volumes remain unadjusted share counts while prices use Yahoo's adjusted-close column for comparability.",
     ]
@@ -204,7 +204,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
         "Corporate: Quarterly earnings (typically late Jan/Apr/Jul/Oct) and forward guidance, buyback/dividend updates, and major launch events (WWDC in June, iPhone/Watch refresh in September) often trigger sharp repricing of growth and margin expectations.",
         "Industry: Semiconductor supply, foundry pricing (e.g., TSMC), and competitor launches in smartphones, PCs, and wearables shift share assumptions; channel checks or disruptions in Greater China/Europe can swing demand outlooks.",
         "Economic: FOMC rate decisions, CPI/PCE inflation releases, and labor data reset discount rates and consumer spending expectations; USD strength/weakness and tariff or export-control actions move reported revenue and cost structures.",
-        "Sentiment & Events: Regulatory actions (App Store, antitrust), high‑profile litigation, cybersecurity incidents, or macro shocks (banking stress, pandemics, geopolitical conflict) can cause volatility spikes or regime shifts.",
+        "Sentiment & Events: Regulatory actions (App Store, antitrust), high-profile litigation, cybersecurity incidents, or macro shocks (banking stress, pandemics, geopolitical conflict) can cause volatility spikes or regime shifts.",
         "How they impact price: Positive surprises to revenue growth, services margins, or cost control widen valuation multiples; negative guidance, supply constraints, or macro tightening compress multiples and drive gap-downs, usually alongside elevated volume.",
     ]
     y1 = 0.88
