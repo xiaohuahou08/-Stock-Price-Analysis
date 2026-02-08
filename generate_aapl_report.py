@@ -124,7 +124,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Daily close with 30- and 90-day moving averages."
-    desc = "This chart plots Apple's daily closing price for the past year and overlays 30-day and 90-day moving averages. The moving averages smooth short-term noise to reveal the underlying trend direction; when the close stays above both averages the trend is typically stronger, while compression between the lines signals slowing momentum."
+    desc = "This chart plots Apple's daily closing price for the past year and overlays 30-day and 90-day moving averages. The moving averages smooth short-term noise to reveal the underlying trend direction. When the close stays above both averages the trend is typically stronger, while compression between the lines signals slowing momentum."
     pages.append((fig, 'Moving Averages', caption, desc))
 
     # Trendline with extension
@@ -162,7 +162,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
     caption = "Distribution of daily log returns with a normal fit overlay."
-    desc = "This histogram shows the distribution of Apple's daily log returns, centered around zero for typical daily moves. The red dashed curve is a normal distribution fit, letting you compare the real return shape to the theoretical bell curve and spot asymmetry or heavier tails that indicate more extreme moves than normal."
+    desc = "This histogram shows the distribution of Apple's daily log returns, centered around zero for typical daily moves. The red dashed curve is a normal distribution fit, letting you compare the real return shape to the theoretical bell curve. It also helps spot asymmetry or heavier tails that indicate more extreme moves than normal."
     pages.append((fig, 'Returns Histogram', caption, desc))
 
     # 30-day rolling volatility (annualized)
