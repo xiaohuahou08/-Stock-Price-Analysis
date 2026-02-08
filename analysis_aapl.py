@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime, timedelta
 import time
 import math
+import matplotlib.pyplot as plt
 
 # Parameters
 symbol = 'AAPL'
@@ -68,6 +69,32 @@ std_30 = daily_return_std * math.sqrt(30)
 # Projected 30-day price range using lognormal approx (1-sigma)
 proj_low = last_price * math.exp(-std_30)
 proj_high = last_price * math.exp(std_30)
+projection_method = (
+    "Projection method: daily log-return volatility scaled by sqrt(30) to form σ30, "
+    "with range computed as last_price × exp(±σ30)."
+)
+
+dates = pd.to_datetime(df['Date'])
+last_date = dates.iloc[-1]
+future_dates = pd.bdate_range(last_date + timedelta(days=1), periods=30)
+proj_low_series = np.full(len(future_dates), proj_low)
+proj_high_series = np.full(len(future_dates), proj_high)
+last_price_series = np.full(len(future_dates), last_price)
+chart_path = 'aapl_30day_price_range.png'
+
+fig, ax = plt.subplots(figsize=(10, 4.5))
+ax.plot(dates, close, label='Close', color='tab:blue', linewidth=1.0)
+ax.axvline(last_date, color='k', linewidth=0.6, linestyle=':')
+ax.fill_between(future_dates, proj_low_series, proj_high_series, alpha=0.25, color='tab:red', label='30d 1σ range')
+ax.plot(future_dates, last_price_series, '--', color='tab:orange', label='Last close')
+ax.set_title('30-day Projected Price Range')
+ax.set_xlabel('Date')
+ax.set_ylabel('Price (USD)')
+ax.grid(alpha=0.2)
+ax.legend()
+fig.tight_layout()
+fig.savefig(chart_path, dpi=150)
+plt.close(fig)
 
 # Output results
 print(f"Symbol: {symbol}")
@@ -82,6 +109,8 @@ print(f"Trend slope (price/day): {slope_per_day:.6f}")
 print(f"Trend 30-day extension (price): {trend_ext_price:.2f}")
 print(f"Daily return std: {daily_return_std:.6f}")
 print(f"Projected 30-day price range (approx 1σ): {proj_low:.2f} - {proj_high:.2f}")
+print(projection_method)
+print(f"30-day price range chart saved to {chart_path}")
 
 # Save summary to file
 with open('aapl_analysis_summary.txt', 'w') as f:
@@ -96,5 +125,7 @@ with open('aapl_analysis_summary.txt', 'w') as f:
     f.write(f"Trend slope (price/day): {slope_per_day:.6f}\n")
     f.write(f"Trend 30-day extension (price): {trend_ext_price:.2f}\n")
     f.write(f"Projected 30-day price range (approx 1σ): {proj_low:.2f} - {proj_high:.2f}\n")
+    f.write(f"{projection_method}\n")
+    f.write(f"30-day price range chart saved to {chart_path}\n")
 
 print('\nSummary written to aapl_analysis_summary.txt')
