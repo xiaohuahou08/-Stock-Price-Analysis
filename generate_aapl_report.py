@@ -73,6 +73,19 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
         'font.size': 10,
     })
 
+    # Figure sizes (in inches) optimized for PDF layout to keep captions readable without overflowing.
+    wide_chart_figsize = (10.0, 5.8)
+    medium_chart_figsize = (10.0, 5.0)
+    compact_chart_figsize = (10.0, 4.3)
+    header_top_adjust = 0.9
+    footer_bottom_adjust = 0.18
+    caption_y = 0.12
+    description_y_position = 0.075
+    description_wrap_width = 105
+    description_line_spacing = 1.15
+    header_x = 0.02
+    footer_x = 0.02
+
     dates = pd.to_datetime(df['Date'])
     close = df['Close']
     ma30 = metrics['ma30']
@@ -99,7 +112,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     # (Removed redundant standalone summary page; analysis intro provides the summary)
 
     # Close price with moving averages
-    fig, ax = plt.subplots(figsize=(11, 6))
+    fig, ax = plt.subplots(figsize=wide_chart_figsize)
     ax.plot(dates, close, label='Close', color='tab:blue', linewidth=1.2)
     ax.plot(dates, ma30, label='30d MA', color='tab:orange')
     ax.plot(dates, ma90, label='90d MA', color='tab:green')
@@ -109,11 +122,13 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     ax.legend()
     ax.grid(alpha=0.2)
     fig.tight_layout()
+    fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
+    caption = "Daily close with 30- and 90-day moving averages."
     desc = "This chart shows Apple's daily closing price over the past year, with 30-day and 90-day moving averages. The moving averages help visualize medium- and long-term price trends, smoothing out short-term fluctuations."
-    pages.append((fig, 'Moving Averages', desc))
+    pages.append((fig, 'Moving Averages', caption, desc))
 
     # Trendline with extension
-    fig, ax = plt.subplots(figsize=(11, 6))
+    fig, ax = plt.subplots(figsize=wide_chart_figsize)
     ax.plot(dates, close, label='Close', color='tab:blue', linewidth=1.0)
     ax.plot(dates, trend_hist, '--', color='gray', label='Trend (hist)')
     ax.plot(future_dates, trend_future, '--', color='gray', label='Trend (30d ext)')
@@ -124,29 +139,35 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     ax.legend()
     ax.grid(alpha=0.2)
     fig.tight_layout()
+    fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
+    caption = "Linear trend fitted to closing prices with a 30-trading-day extension."
     desc = "A linear trendline is fitted to Apple's historical closing prices and extended 30 trading days into the future. This illustrates the average price drift, but does not account for volatility or unexpected events."
-    pages.append((fig, 'Trend Extension', desc))
+    pages.append((fig, 'Trend Extension', caption, desc))
 
     # Daily returns histogram
     returns = np.log(close / close.shift(1)).dropna()
     mu = returns.mean()
     sigma = returns.std()
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=medium_chart_figsize)
     n, bins, patches = ax.hist(returns, bins=30, density=True, alpha=0.6, color='tab:blue')
-    from scipy.stats import norm
     x_vals = np.linspace(returns.min(), returns.max(), 200)
-    ax.plot(x_vals, norm.pdf(x_vals, mu, sigma), 'r--', label='Normal PDF')
+    if sigma > 0:
+        # Manual normal PDF to avoid scipy dependency: f(x) = (1/(sigma*sqrt(2*pi))) * exp(-0.5*((x-mu)/sigma)**2)
+        normal_pdf_values = (1 / (sigma * math.sqrt(2 * math.pi))) * np.exp(-0.5 * ((x_vals - mu) / sigma) ** 2)
+        ax.plot(x_vals, normal_pdf_values, 'r--', label='Normal PDF')
     ax.set_title('Daily Log Returns Histogram')
     ax.set_xlabel('Log Return')
     ax.set_ylabel('Density')
     ax.legend()
     fig.tight_layout()
+    fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
+    caption = "Distribution of daily log returns with a normal fit overlay."
     desc = "This histogram shows the distribution of daily log returns for Apple stock. The red dashed line is a normal distribution fit, allowing comparison of actual return behavior to theoretical expectations (skewness, fat tails)."
-    pages.append((fig, 'Returns Histogram', desc))
+    pages.append((fig, 'Returns Histogram', caption, desc))
 
     # 30-day rolling volatility (annualized)
     roll_vol = returns.rolling(window=30, min_periods=1).std() * math.sqrt(252)
-    fig, ax = plt.subplots(figsize=(11, 4))
+    fig, ax = plt.subplots(figsize=compact_chart_figsize)
     ax.plot(dates[1:], roll_vol, color='tab:purple', label='30d Rolling Vol (annualized)')
     ax.set_title('30‑day Rolling Volatility (annualized)')
     ax.set_xlabel('Date')
@@ -154,19 +175,23 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     ax.grid(alpha=0.2)
     ax.legend()
     fig.tight_layout()
+    fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
+    caption = "Rolling 30-day (annualized) volatility of daily log returns."
     desc = "The 30-day rolling volatility (annualized) measures the time-varying risk of Apple stock. Higher volatility periods indicate greater uncertainty and larger price swings, often coinciding with major news or events."
-    pages.append((fig, 'Rolling Volatility', desc))
+    pages.append((fig, 'Rolling Volatility', caption, desc))
 
     # Volume chart
-    fig, ax = plt.subplots(figsize=(11, 4))
+    fig, ax = plt.subplots(figsize=compact_chart_figsize)
     ax.bar(dates, df['Volume'], color='tab:gray')
     ax.set_title('Daily Trading Volume')
     ax.set_xlabel('Date')
     ax.set_ylabel('Volume')
     ax.grid(alpha=0.12)
     fig.tight_layout()
+    fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
+    caption = "Shares traded per day based on Yahoo Finance volume."
     desc = "This chart displays Apple's daily trading volume. Spikes in volume often signal major price moves, news releases, or shifts in investor sentiment, and help assess liquidity."
-    pages.append((fig, 'Volume', desc))
+    pages.append((fig, 'Volume', caption, desc))
 
     # Now build final PDF: title page, TOC, then pages with headers/footers
     title_fig = plt.figure(figsize=(8.27, 11.69))
@@ -254,12 +279,14 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
 
         # content pages (charts)
         gen_date = datetime.utcnow().date().isoformat()
-        for fig, short_title, description in pages:
+        for fig, short_title, caption, description in pages:
             # add consistent minimal header/footer
-            fig.text(0.02, 0.98, 'Apple Inc. (AAPL)', ha='left', va='top', fontsize=8)
-            fig.text(0.5, 0.93, description, ha='center', va='center', fontsize=9, color='gray')
+            fig.text(header_x, 0.98, 'Apple Inc. (AAPL)', ha='left', va='top', fontsize=8)
+            fig.text(0.5, caption_y, caption, ha='center', va='center', fontsize=9, fontweight='bold')
+            wrapped_desc = textwrap.fill(description, width=description_wrap_width)
+            fig.text(0.5, description_y_position, wrapped_desc, ha='center', va='center', fontsize=8, color='gray', linespacing=description_line_spacing)
             fig.text(0.98, 0.02, f'Page {page_no}', ha='right', va='bottom', fontsize=8)
-            fig.text(0.02, 0.02, f'Generated: {gen_date}', ha='left', va='bottom', fontsize=8)
+            fig.text(footer_x, 0.02, f'Generated: {gen_date}', ha='left', va='bottom', fontsize=8)
             pdf.savefig(fig)
             plt.close(fig)
             page_no += 1
