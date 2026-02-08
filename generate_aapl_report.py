@@ -196,8 +196,8 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     ax.legend()
     fig.tight_layout()
     fig.subplots_adjust(top=header_top_adjust, bottom=footer_bottom_adjust)
-    caption = "Projects a 30‑day price band using realized volatility (one standard deviation over 30 days, 1σ₃₀)."
-    desc = "The shaded band projects a 30-day price range using the latest close and historical daily log-return volatility. The daily volatility (σ) is scaled by √30 to form σ₃₀ (the 30-day volatility). The range uses last_price × exp(σ₃₀) for the upper bound and last_price × exp(-σ₃₀) for the lower bound, so it represents a probabilistic 1σ band rather than a point forecast."
+    caption = "Projects a 30‑day price band using realized volatility (one standard deviation over 30 days, 1σ30)."
+    desc = "The shaded band projects a 30-day price range using the latest close and historical daily log-return volatility. The daily volatility (σ) is scaled by √30 to form σ30 (the 30-day volatility). The range uses last_price × exp(σ30) for the upper bound and last_price × exp(-σ30) for the lower bound, so it represents a probabilistic 1σ band rather than a point forecast."
     pages.append((fig, '30‑day Projected Range', caption, desc))
 
     # Volume chart
@@ -265,7 +265,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
         f"30d MA (latest): {metrics['ma30'].iloc[-1]:.2f}   90d MA (latest): {metrics['ma90'].iloc[-1]:.2f}\n"
         f"Trend slope: {metrics['slope']:.4f} USD/day   30‑day trend ext: {metrics['last_price'] + metrics['slope']*30:.2f}\n"
         f"30‑day projected 1σ range: {proj_low:.2f} — {proj_high:.2f}\n"
-        "Projection method: daily log-return volatility scaled by √30, with the range computed as last_price × exp(±σ₃₀).\n\n"
+        "Projection method: daily log-return volatility scaled by √30 to σ30 (30-day volatility), with the range computed as last_price × exp(±σ30).\n\n"
         "Event drivers (summary): dividends and earnings, product cycles, macro (rates/inflation),\n"
         "industry supply/competitive events. Limitations: uses historical realized volatility, linear trend,\n"
         "and does not capture intraday or options-implied signals or future structural breaks.\n"
