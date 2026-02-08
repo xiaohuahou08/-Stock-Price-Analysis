@@ -1,9 +1,8 @@
 import re
 import pandas as pd
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import math
-from datetime import datetime, timedelta
 import textwrap
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -283,7 +282,7 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     title_fig.suptitle('Apple Inc. (AAPL)', fontsize=28, y=0.7)
     plt.axis('off')
     plt.text(0.5, 0.55, '1‑Year Price Analysis', ha='center', va='center', fontsize=18)
-    plt.text(0.5, 0.45, f'Generated: {datetime.utcnow().date()}', ha='center', va='center', fontsize=10)
+    plt.text(0.5, 0.45, f'Generated: {datetime.now(timezone.utc).date()}', ha='center', va='center', fontsize=10)
 
     # Build sections: combine selection, data collection, and major events, then data analysis
     date_range = f"{df['Date'].min()} to {df['Date'].max()}"
@@ -345,15 +344,20 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     )
     wrapped_event_text = textwrap.fill(event_text, width=96)
     event_fig.text(0.07, 0.85, wrapped_event_text, va='top', ha='left', fontsize=11)
-    sources_text = (
-        "Sources:\n"
-        "[1] Yahoo Finance, AAPL Historical Data, https://finance.yahoo.com/quote/AAPL/history\n"
-        "[2] Federal Reserve Board, FOMC calendars & policy decisions, https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
-    )
-    wrapped_sources = textwrap.fill(sources_text, width=96)
-    event_fig.text(0.07, 0.18, wrapped_sources, va='top', ha='left', fontsize=9)
+    source_entries = [
+        ("[1] Yahoo Finance, AAPL Historical Data", "https://finance.yahoo.com/quote/AAPL/history"),
+        ("[2] Federal Reserve Board, FOMC calendars & policy decisions", "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"),
+    ]
+    url_indent = "    "
+    source_blocks = ["Sources:"]
+    for label, url in source_entries:
+        wrapped_label = textwrap.fill(label, width=96)
+        source_blocks.append(wrapped_label)
+        source_blocks.append(f"{url_indent}{url}")
+    event_fig.text(0.07, 0.18, "\n".join(source_blocks), va='top', ha='left', fontsize=9)
 
-    # Save all to PDF in order: title, stock selection, data collection, analysis intro, then chart pages
+    # Save all to PDF in order: title, stock selection, data collection, analysis intro, event impact, then chart pages
+    gen_date = datetime.now(timezone.utc).date().isoformat()
     with PdfPages(out_pdf) as pdf:
         page_no = 1
         # title
@@ -372,7 +376,6 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
         page_no += 1
 
         # content pages (charts)
-        gen_date = datetime.utcnow().date().isoformat()
         for fig, short_title, caption, description in pages:
             # add consistent minimal header/footer
             fig.text(header_x, 0.98, 'Apple Inc. (AAPL)', ha='left', va='top', fontsize=8)
@@ -391,8 +394,6 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
         pdf.savefig(event_fig)
         plt.close(event_fig)
         page_no += 1
-
-    print(f'Report saved to {out_pdf}')
 
     print(f'Report saved to {out_pdf}')
 
