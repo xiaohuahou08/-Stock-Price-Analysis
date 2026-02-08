@@ -273,11 +273,8 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
     caption = "Shares traded per day based on Yahoo Finance volume."
     desc = (
         "This chart displays Apple's daily trading volume, highlighting how much liquidity traded each session. "
-        "Noticeable spikes often accompany dividends, earnings releases, product-cycle updates, macro headlines "
-        "(rates/inflation), or industry supply and competitive events, and elevated volume during trend changes can "
-        "signal stronger conviction from market participants. Limitations: the analysis uses historical realized "
-        "volatility and a linear trend baseline, and it does not capture intraday or options-implied signals or "
-        "future structural breaks."
+        "Noticeable spikes often accompany earnings releases, macro headlines, or large price moves, and elevated "
+        "volume during trend changes can signal stronger conviction from market participants."
     )
     pages.append((fig, 'Volume', caption, desc))
 
@@ -314,8 +311,10 @@ def make_report(df, metrics, out_pdf='AAPL_report_improved.pdf'):
         "Section 2 focuses on Apple's price behavior over the past year using the charts that follow. Key metrics "
         "such as the latest close, central tendency, moving-average levels, trend slope, and volatility-based "
         "projection range are plotted directly on the figures so each statistic is tied to its visual context. "
-        "Together, the charts summarize trend direction, return distribution, risk regime, projected range, and "
-        "volume dynamics without duplicating raw figures in this section."
+        "Event drivers across the period include dividends and earnings updates, product-cycle news, macro "
+        "developments like rates and inflation, and industry supply or competitive shifts. Limitations: the analysis "
+        "uses historical realized volatility and a linear trend baseline, and it does not capture intraday or "
+        "options-implied signals or future structural breaks."
     )
     analysis_fig = plt.figure(figsize=(8.27, 11.69))
     analysis_fig.suptitle('Section 2 — Data Analysis', fontsize=18, y=0.95)
